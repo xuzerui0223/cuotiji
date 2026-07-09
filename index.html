@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>错题本 · 智能错题集与自测系统</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <!-- 顶栏 -->
+  <header class="topbar">
+    <div class="brand">
+      <span class="brand-logo">📕</span>
+      <span class="brand-name">错题本</span>
+      <span class="brand-sub">智能错题集 · 自测 · 举一反三</span>
+    </div>
+    <div class="topbar-stats">
+      <div class="stat-chip" title="累计积分">
+        <span class="chip-icon">⭐</span>
+        <span class="chip-val" id="hdr-points">0</span>
+        <span class="chip-label">积分</span>
+      </div>
+      <div class="stat-chip rank-chip" title="当前段位">
+        <span class="chip-icon" id="hdr-rank-icon">🥉</span>
+        <span class="chip-val" id="hdr-rank">青铜</span>
+        <span class="chip-label">段位</span>
+      </div>
+      <div class="stat-chip" title="连续打卡天数">
+        <span class="chip-icon">🔥</span>
+        <span class="chip-val" id="hdr-streak">0</span>
+        <span class="chip-label">天连打卡</span>
+      </div>
+      <button class="icon-btn" id="btn-checkin" title="今日打卡">📅 打卡</button>
+      <button class="icon-btn" id="theme-toggle" title="切换浅色/护眼模式">🌞</button>
+    </div>
+  </header>
+
+  <div class="layout">
+    <!-- 侧边导航 -->
+    <aside class="sidebar">
+      <nav class="nav">
+        <a class="nav-link active" data-view="dashboard"><span>🏠</span>概览</a>
+        <a class="nav-link" data-view="add"><span>➕</span>录入错题</a>
+        <a class="nav-link" data-view="list"><span>📚</span>错题本</a>
+        <a class="nav-link" data-view="practice"><span>✍️</span>自测练习</a>
+        <a class="nav-link" data-view="extend"><span>🧠</span>举一反三</a>
+        <a class="nav-link" data-view="stats"><span>📊</span>学习统计</a>
+        <a class="nav-link" data-view="rewards"><span>🏅</span>奖励中心</a>
+        <a class="nav-link" data-view="groups"><span>👥</span>学习小组</a>
+        <a class="nav-link" data-view="settings"><span>⚙️</span>设置</a>
+      </nav>
+      <div class="sidebar-foot">
+        <div class="progress-mini">
+          <div class="progress-mini-label">段位进度</div>
+          <div class="progress-mini-bar"><div class="progress-mini-fill" id="side-rank-fill"></div></div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- 主内容 -->
+    <main class="main">
+      <!-- 概览 -->
+      <section class="view active" id="view-dashboard">
+        <h1 class="page-title">学习概览</h1>
+        <p class="page-desc" id="dash-greet">欢迎回来，继续攻克你的错题吧！</p>
+        <div class="dash-grid" id="dash-stats"></div>
+        <div class="dash-cols">
+          <div class="card">
+            <div class="card-head"><h2>最近录入</h2><a class="link" data-view="list">查看全部 →</a></div>
+            <div id="dash-recent" class="dash-recent"></div>
+          </div>
+          <div class="card">
+            <div class="card-head"><h2>建议今日</h2></div>
+            <div id="dash-next" class="dash-next"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 录入 -->
+      <section class="view" id="view-add">
+        <h1 class="page-title">录入错题</h1>
+        <p class="page-desc">填写题目信息，录入即获得 <b>+10</b> 积分。题型标签用于「举一反三」同类练习。</p>
+        <form id="form-add" class="card form-card">
+          <div class="form-row">
+            <label>科目 <span class="req">*</span></label>
+            <select id="f-subject" required></select>
+            <input id="f-subject-custom" class="hidden" placeholder="输入自定义科目" />
+          </div>
+          <div class="form-row">
+            <label>题型标签 <span class="req">*</span></label>
+            <input id="f-type" required placeholder="如：一元二次方程 / 英语定语从句 / 牛顿第二定律" />
+            <small class="hint">同标签的题会在「自测 / 举一反三」中聚成一组练习</small>
+          </div>
+          <div class="form-row">
+            <label>知识点 <span class="req">*</span></label>
+            <input id="f-kp" required list="kp-list" placeholder="如：平方根 / 主谓一致 / 牛顿第二定律（用于匹配同类新题）" />
+            <datalist id="kp-list"></datalist>
+            <small class="hint">填更细的知识点；可选系统已有知识点以自动匹配「举一反三」同类新题</small>
+          </div>
+          <div class="form-row">
+            <label>题干 <span class="req">*</span></label>
+            <textarea id="f-question" rows="4" required placeholder="抄录题目原文……"></textarea>
+          </div>
+          <div class="form-row two">
+            <div>
+              <label>我的答案</label>
+              <textarea id="f-my" rows="2" placeholder="当时写的错误答案"></textarea>
+            </div>
+            <div>
+              <label>正确答案</label>
+              <textarea id="f-correct" rows="2" placeholder="标准答案"></textarea>
+            </div>
+          </div>
+          <div class="form-row">
+            <label>解析 / 错因</label>
+            <textarea id="f-analysis" rows="3" placeholder="为什么错？正确思路是什么？"></textarea>
+          </div>
+          <div class="form-row two">
+            <div>
+              <label>难度</label>
+              <select id="f-difficulty">
+                <option value="1">★ 简单</option>
+                <option value="2">★★ 较易</option>
+                <option value="3" selected>★★★ 中等</option>
+                <option value="4">★★★★ 较难</option>
+                <option value="5">★★★★★ 困难</option>
+              </select>
+            </div>
+            <div>
+              <label>初始掌握程度</label>
+              <select id="f-mastery">
+                <option value="0" selected>🔴 未掌握</option>
+                <option value="1">🟡 复习中</option>
+                <option value="2">🟢 已掌握</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-row">
+            <label>配图链接（可选）</label>
+            <input id="f-image" placeholder="https://... 图片地址" />
+          </div>
+          <div class="form-actions">
+            <button type="submit" class="btn btn-primary">保存错题（+10 积分）</button>
+            <button type="reset" class="btn btn-ghost">清空</button>
+          </div>
+        </form>
+      </section>
+
+      <!-- 错题本 -->
+      <section class="view" id="view-list">
+        <h1 class="page-title">错题本</h1>
+        <p class="page-desc">三色标记：🔴 未掌握 · 🟡 复习中 · 🟢 已掌握。点击标记可循环切换。</p>
+        <div class="toolbar" id="list-filters"></div>
+        <div class="list-container" id="list-container"></div>
+        <div class="list-empty hidden" id="list-empty">还没有错题，去「录入错题」添加第一题吧！</div>
+      </section>
+
+      <!-- 自测 -->
+      <section class="view" id="view-practice">
+        <h1 class="page-title">自测练习</h1>
+        <p class="page-desc">随机抽取错题作答，每完成一题 +5 积分。未掌握（红）的题目会优先出现。</p>
+        <div id="practice-setup" class="card"></div>
+        <div id="practice-area"></div>
+      </section>
+
+      <!-- 举一反三 -->
+      <section class="view" id="view-extend">
+        <h1 class="page-title">举一反三</h1>
+        <p class="page-desc">选择知识点，系统先让你重做自己的错题，再<strong>推送同知识点的同类新题</strong>（举一反三）。答错的新题会自动收入错题本。</p>
+        <div id="extend-setup" class="card"></div>
+        <div id="extend-area"></div>
+      </section>
+
+      <!-- 统计 -->
+      <section class="view" id="view-stats">
+        <h1 class="page-title">学习统计</h1>
+        <p class="page-desc">用数据看见自己的进步。</p>
+        <div id="stats-charts" class="stats-grid"></div>
+      </section>
+
+      <!-- 奖励 -->
+      <section class="view" id="view-rewards">
+        <h1 class="page-title">奖励中心</h1>
+        <p class="page-desc">积分、段位与勋章，记录你的每一份努力。</p>
+        <div id="rewards-content"></div>
+      </section>
+
+      <!-- 设置 -->
+      <section class="view" id="view-settings">
+        <h1 class="page-title">设置</h1>
+        <div class="settings-grid">
+          <div class="card">
+            <div class="card-head"><h2>个性化</h2></div>
+            <div class="form-row">
+              <label>昵称</label>
+              <input id="set-name" placeholder="你的名字" />
+            </div>
+            <div class="form-row">
+              <label>主题模式</label>
+              <select id="set-theme">
+                <option value="light">浅色模式</option>
+                <option value="eye">护眼模式</option>
+              </select>
+            </div>
+            <div class="form-row">
+              <label>年级</label>
+              <select id="set-grade">
+                <option value="">未选择</option>
+                <option value="小学">小学</option>
+                <option value="初中">初中</option>
+                <option value="高中">高中</option>
+              </select>
+            </div>
+            <div class="form-row checkbox-row">
+              <label class="check-label">
+                <input type="checkbox" id="set-share" />
+                <span>向小组成员<strong>公开我的错题集</strong>（关闭则仅显示积分与统计概览）</span>
+              </label>
+            </div>
+            <div class="form-actions">
+              <button class="btn btn-primary" id="btn-save-settings">保存设置</button>
+              <button class="btn btn-ghost" id="btn-reseed">按该年级重新推送易错题</button>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-head"><h2>数据 · 导入 / 导出</h2></div>
+            <p class="hint">导出为 JSON 文件备份；导入可恢复或合并数据。</p>
+            <div class="form-actions">
+              <button class="btn btn-primary" id="btn-export">⬇ 导出数据</button>
+              <button class="btn btn-ghost" id="btn-import">⬆ 导入数据</button>
+              <input type="file" id="import-file" accept="application/json" class="hidden" />
+            </div>
+            <hr class="sep" />
+            <button class="btn btn-danger-ghost" id="btn-reset">清空全部数据</button>
+          </div>
+          <div class="card">
+            <div class="card-head"><h2>打印排版</h2></div>
+            <p class="hint">生成适合打印 / 复习的错题卷，A4 排版、隐藏无关元素。</p>
+            <div class="form-row">
+              <label>打印筛选</label>
+              <select id="print-filter">
+                <option value="all">全部错题</option>
+                <option value="0">仅未掌握（红）</option>
+                <option value="1">仅复习中（黄）</option>
+                <option value="2">仅已掌握（绿）</option>
+              </select>
+            </div>
+            <button class="btn btn-primary" id="btn-print">🖨 生成打印卷</button>
+          </div>
+          <div class="card">
+            <div class="card-head"><h2>账号</h2></div>
+            <p class="hint">你已登录，错题与积分会与当前账号关联，可在小组中排行、互看错题。</p>
+            <button class="btn btn-danger-ghost" id="btn-logout">退出登录</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- 学习小组 -->
+      <section class="view" id="view-groups">
+        <h1 class="page-title">学习小组</h1>
+        <p class="page-desc">创建或加入学习小组，和同学一起比拼积分、互看错题。每个小组有独立编号，把编号发给同学即可申请加入。</p>
+        <div class="toolbar">
+          <button class="btn btn-primary" id="btn-create-group">＋ 创建学习小组</button>
+          <div class="search-group">
+            <input id="group-search-input" placeholder="输入 6 位小组编号搜索" />
+            <button class="btn" id="btn-group-search">搜索</button>
+          </div>
+        </div>
+        <div id="my-groups" class="group-list"></div>
+        <div id="group-search-result"></div>
+        <div id="group-detail"></div>
+      </section>
+    </main>
+  </div>
+
+  <!-- 打印区域（仅打印时可见） -->
+  <div id="print-area" class="print-area"></div>
+
+  <!-- 首次进入：选择年级 -->
+  <div class="modal-overlay hidden" id="grade-modal">
+    <div class="modal-card">
+      <div class="modal-emoji">🎓</div>
+      <h2>欢迎使用错题本</h2>
+      <p class="modal-desc">请先选择你的<strong>年级</strong>，我们会按该年级段为你推送各学科经典<strong>易错题</strong>（每科 5 道），帮你针对性查漏补缺。</p>
+      <div class="grade-grid" id="grade-grid"></div>
+      <p class="modal-foot">之后可随时在「设置」中更改或重新推送。</p>
+    </div>
+  </div>
+
+  <!-- 登录遮罩 -->
+  <div class="modal-overlay" id="login-overlay">
+    <div class="modal-card login-card">
+      <div class="modal-emoji">👋</div>
+      <h2>登录错题本</h2>
+      <p class="modal-desc">登录后即可创建/加入学习小组，和同学一起比积分、互看错题。</p>
+      <button class="btn btn-wechat" id="btn-wechat-login">💬 微信登录</button>
+      <div class="login-divider"><span>或</span></div>
+      <div class="login-dev">
+        <input id="login-name" placeholder="输入昵称体验登录（无需微信）" />
+        <button class="btn btn-primary" id="btn-dev-login">进入</button>
+      </div>
+      <p class="modal-foot">提示：未配置微信开放平台资质时，可用「体验登录」完整体验全部小组功能。</p>
+    </div>
+  </div>
+
+  <!-- 创建小组弹窗 -->
+  <div class="modal-overlay hidden" id="group-modal">
+    <div class="modal-card">
+      <div class="modal-emoji">👥</div>
+      <h2>创建学习小组</h2>
+      <div class="form-row">
+        <label>小组名称 <span class="req">*</span></label>
+        <input id="group-name" placeholder="如：初三冲刺小队" />
+      </div>
+      <div class="form-row">
+        <label>简介（可选）</label>
+        <input id="group-desc" placeholder="一句话介绍你们的小组" />
+      </div>
+      <div class="form-actions">
+        <button class="btn btn-primary" id="btn-group-create-confirm">创建并获取编号</button>
+        <button class="btn btn-ghost" id="btn-group-create-cancel">取消</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 查看成员错题弹窗 -->
+  <div class="modal-overlay hidden" id="member-modal">
+    <div class="modal-card modal-wide">
+      <button class="modal-close" id="member-modal-close">✕</button>
+      <div id="member-modal-body"></div>
+    </div>
+  </div>
+
+  <!-- 提示 -->
+  <div id="toast" class="toast"></div>
+
+  <script src="app.js"></script>
+</body>
+</html>

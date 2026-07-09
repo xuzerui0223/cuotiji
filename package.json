@@ -1,0 +1,15 @@
+{
+  "name": "cuotiji-study-groups",
+  "version": "1.0.0",
+  "description": "错题本 + 学习小组（Node/Express，含微信体验登录与小组功能）",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "express": "^5.2.1"
+  }
+}
