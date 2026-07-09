@@ -3,3 +3,7 @@ server_data.json
 server_data.json.tmp
 .DS_Store
 *.log
+
+# 项目内部/本地配置
+.codebuddy/
+.workbuddy/
