@@ -7,3 +7,7 @@ server_data.json.tmp
 # 项目内部/本地配置
 .codebuddy/
 .workbuddy/
+
+# 项目内部/本地配置
+.codebuddy/
+.workbuddy/
